@@ -46,7 +46,7 @@ canvas{display:block;width:100%;height:100%}
   width:min(360px,calc(100% - 40px));max-height:calc(100% - 120px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow:auto;
   padding:20px 22px 18px;
   background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  border:1px solid var(--line);border-radius:4px;
+  border:1px solid var(--line);border-radius:4px;z-index:3;
 }
 .kicker{margin:0 0 6px;font-size:13px;color:var(--muted);line-height:1.35}
 h1{margin:0 0 14px;font:400 44px/0.98 "Instrument Serif",Georgia,"Times New Roman",serif;letter-spacing:-.01em}
@@ -58,6 +58,7 @@ td{padding:6px 0;border-top:1px solid var(--line);text-align:right;vertical-alig
 td:first-child{padding-right:10px}
 td small{display:block;color:var(--muted);font-size:11.5px}
 tr.total td{font-weight:600}
+td:not(:first-child){white-space:nowrap;padding-left:10px}
 .avg{margin:10px 0 0;font-size:13px}
 #modeText{margin:10px 0 0;font-size:13.5px;padding-top:10px;border-top:1px solid var(--line)}
 .find{display:flex;gap:6px;margin-top:12px}
@@ -73,7 +74,7 @@ tr.total td{font-weight:600}
 .controls{
   position:fixed;left:50%;transform:translateX(-50%);
   bottom:calc(18px + env(safe-area-inset-bottom,0px));
-  display:flex;flex-wrap:wrap;justify-content:center;gap:8px;
+  display:flex;flex-wrap:wrap;justify-content:center;gap:8px;z-index:3;
   width:max-content;max-width:calc(100% - 24px);
 }
 .seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
@@ -93,9 +94,9 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   position:fixed;left:0;top:0;pointer-events:none;transform:translate(-50%,-100%);
   font-size:12.5px;line-height:1.3;text-align:center;white-space:nowrap;
   padding:5px 9px;background:var(--panel);border:1px solid var(--line);border-radius:3px;
-  transition:opacity .3s;
+  transition:opacity .3s;z-index:1;
 }
-.tag span{display:block;color:var(--gold);font-weight:600}
+.tag .n{display:block;color:var(--gold);font-weight:600}
 #tip{
   position:fixed;left:0;top:0;pointer-events:none;z-index:5;padding:9px 12px;font-size:13px;line-height:1.45;
   background:var(--panel);border:1px solid var(--line);border-radius:4px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
@@ -105,15 +106,60 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 #tip small{color:var(--muted);font-size:11.5px;display:block;margin-top:3px}
 #err{position:fixed;inset:0;display:none;place-items:center;padding:24px;text-align:center}
 
-@media (max-width:700px){
-  .panel{padding:12px 14px 10px;top:calc(12px + env(safe-area-inset-top,0px));left:12px;width:calc(100% - 24px);max-height:46%}
-  h1{font-size:28px;margin-bottom:8px}
-  h1 small{font-size:17px;display:inline;margin-left:6px}
-  table{font-size:12px}
-  .note,.hint,.avg{display:none}
-  #modeText{font-size:12.5px}
-  button{padding:9px 11px;font-size:12.5px}
-  .tag{font-size:11px;padding:3px 6px}
+#more,.mhint{display:none}
+.tag .short{display:none}
+button{touch-action:manipulation}
+
+/* Phones and short screens: the panel collapses to a slim header, details open on demand */
+@media (max-width:700px),(max-height:500px){
+  .panel{
+    left:calc(10px + env(safe-area-inset-left,0px));right:calc(10px + env(safe-area-inset-right,0px));width:auto;
+    top:calc(10px + env(safe-area-inset-top,0px));padding:10px 10px 10px 14px;max-height:none;overflow:visible;
+  }
+  .head{display:flex;align-items:center;gap:10px}
+  .head>div{flex:1;min-width:0}
+  .kicker{display:none}
+  h1{font-size:25px;margin:0;line-height:1.02}
+  h1 small{font-size:15px;margin-top:3px}
+  #more{display:block;flex:none;background:var(--btn);padding:12px 16px;min-height:44px}
+  #details{
+    display:none;margin-top:10px;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    max-height:calc(100vh - 230px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+    max-height:calc(100dvh - 230px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  }
+  .panel.open #details{display:block}
+  table{font-size:12.5px}
+  .avg,#modeText{font-size:12.5px}
+  .find input{font-size:16px}
+  .hint{display:none}
+  .mhint{display:block;margin:8px 0 0;font-size:12px;color:var(--muted)}
+
+  .controls{
+    left:calc(10px + env(safe-area-inset-left,0px));right:calc(10px + env(safe-area-inset-right,0px));transform:none;
+    bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    width:auto;max-width:none;flex-direction:column;align-items:stretch;gap:6px;
+  }
+  .seg button{flex:1;min-height:44px;padding:0 6px;font-size:13px}
+
+  .tag{font-size:11px;padding:3px 7px}
+  .tag .long{display:none}
+  .tag .short{display:inline}
+
+  /* bar details dock above the buttons instead of covering the model */
+  #tip{
+    left:calc(10px + env(safe-area-inset-left,0px))!important;right:calc(10px + env(safe-area-inset-right,0px));
+    top:auto!important;transform:none!important;max-width:none;
+    bottom:calc(122px + env(safe-area-inset-bottom,0px));
+  }
+  #tip::after{content:"Tap anywhere else to close";display:block;margin-top:4px;font-size:11.5px;color:var(--muted)}
+}
+/* Phones held sideways: keep the buttons on one row */
+@media (max-height:500px) and (min-width:560px){
+  .controls{flex-direction:row;justify-content:center}
+  .seg{flex:1}
+  .panel{right:auto;width:min(380px,48%)}
+  #tip{bottom:calc(66px + env(safe-area-inset-bottom,0px));left:auto!important;width:min(380px,50%)}
+  #details{max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px)}
 }
 @media (prefers-reduced-motion:reduce){#tip,.tag{transition:none}}
 </style>
@@ -121,9 +167,16 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 <body>
 <div id="stage" aria-label="3D model of Danmarks Nationalbank's 5,198 gold bars. Drag to orbit, scroll or pinch to zoom."></div>
 
-<section class="panel">
-  <p class="kicker">Danmarks Nationalbank's gold, from its official gold bar list</p>
-  <h1>5,198 bars<small>66,549.69 kg fine gold</small></h1>
+<section class="panel" id="panel">
+  <div class="head">
+    <div>
+      <p class="kicker">Danmarks Nationalbank's gold, from its official gold bar list</p>
+      <h1>5,198 bars<small>66,549.69 kg fine gold</small></h1>
+    </div>
+    <button id="more" type="button" aria-expanded="false" aria-controls="details">Details</button>
+  </div>
+  <div id="details">
+  <p class="mhint">Drag to turn the model, pinch to zoom, and tap a bar to see its details.</p>
   <table>
     <thead><tr><th>Stored at</th><th>Bars</th><th>Fine weight</th></tr></thead>
     <tbody>
@@ -137,18 +190,19 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   <p id="modeText"></p>
   <form class="find" id="findForm" novalidate>
     <label for="findInput">Bank of England inventory number</label>
-    <input id="findInput" inputmode="numeric" autocomplete="off" placeholder="Find a bar: inventory no. 1 to 5,162">
+    <input id="findInput" inputmode="numeric" autocomplete="off" placeholder="Find a bar (no. 1 to 5,162)">
     <button type="submit">Find</button>
   </form>
   <p id="findMsg" role="status"></p>
   <p class="note">Source: Danmarks Nationalbank, Guldbarreliste / Gold bar list (PDF dated October 2021). Every Bank of England bar shows its listed inventory number, gross weight, fineness and fine weight. The list gives no bar dimensions or vault layout, so the bar shape (London Good Delivery format) and the stacking are illustrative.</p>
+</div>
 </section>
 
 <div class="hint">Drag to orbit<br>Scroll or pinch to zoom<br>Tap a bar to inspect it</div>
 
-<div class="tag" id="tagBoe">Bank of England, London<span>5,162 bars</span></div>
-<div class="tag" id="tagNy">Federal Reserve Bank of New York<span>33 bars</span></div>
-<div class="tag" id="tagCph">Danmarks Nationalbank, Copenhagen<span>3 bars</span></div>
+<div class="tag" id="tagBoe"><span class="long">Bank of England, London</span><span class="short">London</span><span class="n">5,162 bars</span></div>
+<div class="tag" id="tagNy"><span class="long">Federal Reserve Bank of New York</span><span class="short">New York</span><span class="n">33 bars</span></div>
+<div class="tag" id="tagCph"><span class="long">Danmarks Nationalbank, Copenhagen</span><span class="short">Copenhagen</span><span class="n">3 bars</span></div>
 
 <nav class="controls" aria-label="View options">
   <div class="seg" role="group" aria-label="Arrangement">
@@ -227,7 +281,8 @@ const camera=new THREE.PerspectiveCamera(40,1,0.05,200);
 
 scene.add(new THREE.HemisphereLight(0xf3f0ea,0x40372c,0.45));
 const sun=new THREE.DirectionalLight(0xfff1dc,2.1);
-sun.position.set(6,11,7); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048);
+sun.position.set(6,11,7); sun.castShadow=true; const compactMQ=window.matchMedia('(max-width:700px), (max-height:500px)');
+sun.shadow.mapSize.set(compactMQ.matches?1024:2048,compactMQ.matches?1024:2048);
 Object.assign(sun.shadow.camera,{left:-9,right:9,top:9,bottom:-9,near:1,far:40});
 sun.shadow.bias=-0.0004; sun.shadow.normalBias=0.01;
 scene.add(sun);
@@ -378,10 +433,11 @@ function stepAnim(now){
 
 /* ---------- camera orbit ---------- */
 const cam={theta:-0.7,phi:1.0,r:14,ty:0.35,tx:0.9,tz:0}, goal={...cam};
-let spin=!reduceMotion, lastInteract=0;
+let spin=!reduceMotion, lastInteract=0, VF=1; // VF: pulls the camera back on tall, narrow screens so the whole scene fits
 const pointers=new Map(); let pinchD=0, moved=0;
 const el=renderer.domElement;
 el.addEventListener('pointerdown',e=>{
+  if(compactMQ.matches)setOpen(false);
   el.setPointerCapture(e.pointerId);
   pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(pointers.size===1)moved=0;
@@ -467,6 +523,11 @@ function pick(x,y){
 }
 window.addEventListener('keydown',e=>{if(e.key==='Escape')hideTip();});
 
+/* ---------- collapsible panel (phones) ---------- */
+const panel=document.getElementById('panel'), more=document.getElementById('more');
+function setOpen(o){panel.classList.toggle('open',o);more.setAttribute('aria-expanded',o?'true':'false');more.textContent=o?'Close':'Details';}
+more.addEventListener('click',()=>setOpen(!panel.classList.contains('open')));
+
 /* ---------- find a bar ---------- */
 const findMsg=document.getElementById('findMsg');
 document.getElementById('findForm').addEventListener('submit',e=>{
@@ -475,6 +536,7 @@ document.getElementById('findForm').addEventListener('submit',e=>{
   const n=Number(raw);
   if(!/^\d+$/.test(raw)||n<1||n>N_BOE){findMsg.textContent='Enter an inventory number from 1 to 5,162.';return;}
   findMsg.textContent='';
+  if(compactMQ.matches){document.getElementById('findInput').blur();setOpen(false);}
   if(mode!=='vault')setMode('vault');
   const i=n-1; layoutVault(i,tmp);
   Object.assign(goal,{tx:tmp[0],tz:tmp[2],ty:tmp[1],r:2.6,phi:0.95});
@@ -486,7 +548,7 @@ document.getElementById('findForm').addEventListener('submit',e=>{
 const TAGS=[
   {el:document.getElementById('tagBoe'),p:new THREE.Vector3(0,0.75,stackXZ(0)[1]-0.4)},
   {el:document.getElementById('tagNy'),p:new THREE.Vector3(NY_POS[0],0.45,NY_POS[1])},
-  {el:document.getElementById('tagCph'),p:new THREE.Vector3(CPH_POS[0],0.32,CPH_POS[1])}
+  {el:document.getElementById('tagCph'),p:new THREE.Vector3(CPH_POS[0],0,CPH_POS[1]+0.36),below:true}
 ];
 function updateTags(){
   const show=mode==='vault'&&!anim;
@@ -494,7 +556,7 @@ function updateTags(){
     v3.copy(t.p).project(camera);
     const vis=show&&v3.z<1&&Math.abs(v3.x)<1.1&&Math.abs(v3.y)<1.1;
     t.el.style.opacity=vis?1:0;
-    if(vis)t.el.style.transform=`translate(${(v3.x*.5+.5)*window.innerWidth}px,${(-v3.y*.5+.5)*window.innerHeight}px) translate(-50%,-100%)`;
+    if(vis)t.el.style.transform=`translate(${(v3.x*.5+.5)*window.innerWidth}px,${(-v3.y*.5+.5)*window.innerHeight}px) translate(-50%,${t.below?'6px':'-100%'})`;
   }
 }
 
@@ -503,6 +565,7 @@ function resize(){
   const w=stage.clientWidth||window.innerWidth,h=stage.clientHeight||window.innerHeight;
   renderer.setSize(w,h,false); camera.aspect=w/h;
   camera.fov=w<h?58:40; camera.updateProjectionMatrix();
+  const a=w/h; VF=a<1?Math.min(2.2,Math.max(1,1/(a*1.25))):(h<500?1.2:1);
 }
 window.addEventListener('resize',resize); resize();
 
@@ -513,7 +576,8 @@ function frame(now){
   const k=1-Math.pow(0.0015,dt);
   for(const key of ['theta','phi','r','ty','tx','tz'])cam[key]+=(goal[key]-cam[key])*k;
   const sp=Math.sin(cam.phi);
-  camera.position.set(cam.tx+cam.r*sp*Math.sin(cam.theta),cam.ty+cam.r*Math.cos(cam.phi),cam.tz+cam.r*sp*Math.cos(cam.theta));
+  const R=cam.r*VF;
+  camera.position.set(cam.tx+R*sp*Math.sin(cam.theta),cam.ty+R*Math.cos(cam.phi),cam.tz+R*sp*Math.cos(cam.theta));
   camera.lookAt(cam.tx,cam.ty,cam.tz);
   stepAnim(now);
   renderer.render(scene,camera);
